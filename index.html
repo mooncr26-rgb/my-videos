@@ -8,9 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --plyr-color-main: #2563eb; } /* ფლეიერის ლურჯი აქცენტი */
-        
-        /* ტომი და ჯერის ფონის დაყენება */
+        :root { --plyr-color-main: #2563eb; }
         body {
             background-image: url('https://image.api.playstation.com/vulcan/img/rnd/202011/0402/2D4vYyWpT3R4pE4G8fS8t6Lp.png');
             background-size: cover;
@@ -18,8 +16,6 @@
             background-attachment: fixed;
             background-repeat: no-repeat;
         }
-
-        /* კონტენტის ოდნავ დაბნელება ფონზე */
         body::before {
             content: '';
             position: fixed;
@@ -44,7 +40,6 @@
     </header>
 
     <main class="max-w-7xl mx-auto px-4 py-8 relative z-10">
-        
         <div id="admin-panel" class="hidden mb-10 p-6 bg-zinc-900/90 border border-zinc-800 rounded-2xl max-w-xl mx-auto shadow-2xl backdrop-blur-sm">
             <h2 class="text-lg font-bold mb-4 text-white flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
@@ -65,8 +60,7 @@
             </div>
         </div>
 
-        <div id="video-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            </div>
+        <div id="video-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.min.js"></script>
@@ -78,7 +72,6 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let isAdmin = false;
 
-        // ბაზიდან ვიდეოების წამოღება და ეკრანზე გამოტანა
         async function fetchVideos() {
             const grid = document.getElementById('video-grid');
             grid.innerHTML = '<div class="col-span-full text-center py-12 text-zinc-500 text-sm">კავშირი სერვერთან...</div>';
@@ -121,7 +114,6 @@
             });
         }
 
-        // ახალი ვიდეოს ატვირთვა სერვერზე და ბაზაში ჩაწერა
         async function addVideo() {
             const title = document.getElementById('v-title').value.trim();
             const fileInput = document.getElementById('v-file');
@@ -133,19 +125,17 @@
                 return;
             }
 
-            // ღილაკის ბლოკირება ატვირთვის პროცესში
             btn.disabled = true;
             btn.innerText = 'ვიდეო იტვირთება სერვერზე... არ დაკეტო გვერდი!';
             btn.classList.add('bg-zinc-700', 'cursor-not-allowed');
 
-            // 1. ფაილისთვის უნიკალური სახელის მინიჭება დუბლირების თავიდან ასაცილებლად
             const fileExt = file.name.split('.').pop();
             const fileName = `${Date.now()}.${fileExt}`;
 
-            // 2. ვიდეო ფაილის ატვირთვა Supabase Storage-ში
+            // აქ ჩასწორდა დიდი ასოებით 'VIDEOS'
             const { data: storageData, error: storageError } = await _supabase
                 .storage
-                .from('videos')
+                .from('VIDEOS')
                 .upload(fileName, file);
 
             if (storageError) {
@@ -154,15 +144,14 @@
                 return;
             }
 
-            // 3. ატვირთული ფაილის საჯარო ინტერნეტ-ლინკის წამოღება
+            // აქაც ჩასწორდა დიდი ასოებით 'VIDEOS'
             const { data: urlData } = _supabase
                 .storage
-                .from('videos')
+                .from('VIDEOS')
                 .getPublicUrl(fileName);
 
             const publicUrl = urlData.publicUrl;
 
-            // 4. სათაურის და მიღებული ლინკის ჩაწერა მონაცემთა ბაზის ცხრილში
             const { error: dbError } = await _supabase
                 .from('videos')
                 .insert([{ title, url: publicUrl }]);
@@ -172,7 +161,7 @@
             } else {
                 document.getElementById('v-title').value = '';
                 fileInput.value = '';
-                fetchVideos(); // სიის განახლება
+                fetchVideos();
             }
 
             resetUploadButton();
@@ -185,24 +174,20 @@
             btn.classList.remove('bg-zinc-700', 'cursor-not-allowed');
         }
 
-        // ვიდეოს წაშლა ბაზიდანაც და საცავიდანაც
         async function deleteVideo(id, fileUrl) {
             if(!confirm('დარწმუნებული ხარ, რომ გინდა ამ ვიდეოს სამუდამოდ წაშლა?')) return;
             
-            // სახელის ამოღება URL-დან საცავში საპოვნელად
             const fileName = fileUrl.split('/').pop();
 
-            // 1. ფაილის წაშლა Storage-დან
-            await _supabase.storage.from('videos').remove([fileName]);
+            // აქაც ჩასწორდა დიდი ასოებით 'VIDEOS'
+            await _supabase.storage.from('VIDEOS').remove([fileName]);
 
-            // 2. ჩანაწერის წაშლა ცხრილიდან
             const { error } = await _supabase.from('videos').delete().eq('id', id);
             
             if (error) alert('ვერ წაიშალა ბაზიდან: ' + error.message);
             else fetchVideos();
         }
 
-        // ადმინ პანელის გამოჩენა პაროლით
         function toggleAdmin() {
             if (!isAdmin) {
                 let pass = prompt("შეიყვანე ადმინისტრატორის პაროლი:");
@@ -220,7 +205,6 @@
             }
         }
 
-        // პირველადი ჩატვირთვა
         fetchVideos();
     </script>
 </body>
