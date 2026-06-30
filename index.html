@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Platform</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" />
+    <style>
+        :root { --plyr-color-main: #3b82f6; } /* ფლეიერის აქცენტის ფერი (ლურჯი) */
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen font-sans antialiased">
+
+    <header class="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <h1 class="text-xl font-bold tracking-wider text-white">MOON <span class="text-blue-500">STUDIO</span></h1>
+            <span class="text-xs bg-zinc-800 text-zinc-400 px-2 py-1 rounded-md border border-zinc-700">HQ Streaming</span>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <div id="video-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.min.js"></script>
+    <script>
+        // --- აქ ამატებ შენს ვიდეოებს ---
+        const videoData = [
+            {
+                title: "პირველი ვიდეოს სათაური",
+                // შეგიძლია ჩააგდო პირდაპირი MP4 ლინკი (Discord, Cloudflare, DropBox და ა.შ.) ან YouTube-ის ლინკი
+                url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" 
+            },
+            {
+                title: "მეორე ვიდეოს სათაური (YouTube მაგალითი)",
+                url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" 
+            }
+        ];
+
+        // ვიდეოების გენერაცია საიტზე
+        const grid = document.getElementById('video-grid');
+        
+        videoData.forEach((video, index) => {
+            const isYoutube = video.url.includes('youtube.com') || video.url.includes('youtu.be');
+            
+            const card = document.createElement('div');
+            card.className = "bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 shadow-xl transition-all duration-300 hover:border-zinc-700";
+            
+            let playerHTML = '';
+            if (isYoutube) {
+                playerHTML = `<div class="plyr__video-embed js-player"><iframe src="${video.url}" allowfullscreen allowtransparency allow="autoplay"></iframe></div>`;
+            } else {
+                playerHTML = `<video class="js-player" playsinline controls data-poster=""><source src="${video.url}" type="video/mp4" /></video>`;
+            }
+
+            card.innerHTML = `
+                <div class="aspect-video w-full bg-black">
+                    ${playerHTML}
+                </div>
+                <div class="p-4">
+                    <h3 class="font-semibold text-lg text-white line-clamp-2">${video.title}</h3>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+
+        // ფლეიერების ინიციალიზაცია
+        const players = Plyr.setup('.js-player', {
+            controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+            ratio: '16:9'
+        });
+    </script>
+</body>
+</html>
