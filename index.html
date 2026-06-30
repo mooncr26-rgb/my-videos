@@ -132,10 +132,10 @@
             const fileExt = file.name.split('.').pop();
             const fileName = `${Date.now()}.${fileExt}`;
 
-            // აქ ჩასწორდა დიდი ასოებით 'VIDEOS'
+            // საცავის სახელი დაბრუნდა პატარა ასოებზე ('videos')
             const { data: storageData, error: storageError } = await _supabase
                 .storage
-                .from('VIDEOS')
+                .from('videos')
                 .upload(fileName, file);
 
             if (storageError) {
@@ -144,10 +144,10 @@
                 return;
             }
 
-            // აქაც ჩასწორდა დიდი ასოებით 'VIDEOS'
+            // საცავის სახელი დაბრუნდა პატარა ასოებზე ('videos')
             const { data: urlData } = _supabase
                 .storage
-                .from('VIDEOS')
+                .from('videos')
                 .getPublicUrl(fileName);
 
             const publicUrl = urlData.publicUrl;
@@ -179,8 +179,8 @@
             
             const fileName = fileUrl.split('/').pop();
 
-            // აქაც ჩასწორდა დიდი ასოებით 'VIDEOS'
-            await _supabase.storage.from('VIDEOS').remove([fileName]);
+            // საცავის სახელი დაბრუნდა პატარა ასოებზე ('videos')
+            await _supabase.storage.from('videos').remove([fileName]);
 
             const { error } = await _supabase.from('videos').delete().eq('id', id);
             
